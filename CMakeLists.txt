@@ -39,9 +39,6 @@ install(TARGETS ${PROJECT_NAME}
 # Install headers
 install(DIRECTORY include/vaughngl DESTINATION include)
 
-# Install shaders
-install(DIRECTORY shaders DESTINATION share/${PROJECT_NAME})
-
 # Export targets for find_package
 install(EXPORT ${PROJECT_NAME}Targets
   FILE ${PROJECT_NAME}Targets.cmake
@@ -75,8 +72,4 @@ option(VAUGHNGL_BUILD_EXAMPLE "Build example" ON)
 if(VAUGHNGL_BUILD_EXAMPLE)
   add_executable(example example.cpp)
   target_link_libraries(example ${PROJECT_NAME})
-  add_custom_command(TARGET example POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-    ${CMAKE_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:example>/shaders
-  )
 endif()
