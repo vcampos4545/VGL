@@ -26,20 +26,21 @@ Shader& Shader::operator=(Shader&& other) noexcept {
 }
 
 void Shader::load(const char* vertexPath, const char* fragmentPath) {
-  if (m_id) glDeleteProgram(m_id);
-
   std::string vertCode = loadSource(vertexPath);
   std::string fragCode = loadSource(fragmentPath);
-  const char* vCode = vertCode.c_str();
-  const char* fCode = fragCode.c_str();
+  loadFromSource(vertCode.c_str(), fragCode.c_str());
+}
+
+void Shader::loadFromSource(const char* vertexSource, const char* fragmentSource) {
+  if (m_id) glDeleteProgram(m_id);
 
   GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertex, 1, &vCode, NULL);
+  glShaderSource(vertex, 1, &vertexSource, NULL);
   glCompileShader(vertex);
   checkErrors(vertex, "VERTEX");
 
   GLuint fragment = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragment, 1, &fCode, NULL);
+  glShaderSource(fragment, 1, &fragmentSource, NULL);
   glCompileShader(fragment);
   checkErrors(fragment, "FRAGMENT");
 

@@ -1,4 +1,5 @@
 #include <vaughngl/GUI.h>
+#include <vaughngl/EmbeddedShaders.h>
 #include <stdexcept>
 #include <cstdio>
 #include <glm/gtc/matrix_transform.hpp>
@@ -25,7 +26,7 @@ GUI::GUI(int width, int height, const char* title)
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   setupCallbacks();
-  m_shader.load("shaders/default.vert", "shaders/default.frag");
+  m_shader.loadFromSource(EmbeddedShaders::defaultVert, EmbeddedShaders::defaultFrag);
   initMeshes();
 }
 

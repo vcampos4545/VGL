@@ -17,6 +17,7 @@ public:
   Shader& operator=(const Shader&) = delete;
 
   void load(const char* vertexPath, const char* fragmentPath);
+  void loadFromSource(const char* vertexSource, const char* fragmentSource);
   void use() const;
 
   void setBool(const std::string& name, bool value) const;
