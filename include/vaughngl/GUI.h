@@ -40,6 +40,7 @@ public:
   void drawBox(glm::vec3 pos, glm::vec3 size, glm::quat rotation, glm::vec3 color = {1, 1, 1});
   void drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 color = {1, 1, 1});
   void drawCylinder(glm::vec3 pos, float radius, float length, glm::quat rotation, glm::vec3 color = {1, 1, 1});
+  void drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 axis, glm::quat rotation, glm::vec3 color = {1, 1, 1});
 
   // OBJ mesh drawing (uses material colors from the mesh)
   void drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, float scale = 1.0f);

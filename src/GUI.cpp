@@ -248,6 +248,33 @@ void GUI::drawCylinder(glm::vec3 pos, float radius, float length, glm::quat rota
   m_cylinderMesh.draw();
 }
 
+void GUI::drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 axis, glm::quat rotation, glm::vec3 color)
+{
+  axis = glm::normalize(axis);
+  glm::vec3 defaultAxis(0, 1, 0);
+
+  // Compute rotation from default Y-axis to specified axis
+  glm::quat axisRot(1, 0, 0, 0);
+  float d = glm::dot(defaultAxis, axis);
+  if (d < 0.9999f) {
+    if (d < -0.9999f) {
+      // 180 degree rotation (opposite direction)
+      axisRot = glm::angleAxis(glm::pi<float>(), glm::vec3(1, 0, 0));
+    } else {
+      glm::vec3 rotAxis = glm::normalize(glm::cross(defaultAxis, axis));
+      float angle = acos(d);
+      axisRot = glm::angleAxis(angle, rotAxis);
+    }
+  }
+
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
+  model = model * glm::mat4_cast(rotation * axisRot);
+  model = glm::scale(model, glm::vec3(radius * 2.0f, length, radius * 2.0f));
+
+  setupDraw(model, color);
+  m_cylinderMesh.draw();
+}
+
 // --- OBJ Mesh drawing ---
 
 void GUI::drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, float scale)
