@@ -6,5 +6,6 @@
 #include "Shader.h"
 #include "OBJMesh.h"
 #include "GUI.h"
+#include "OrbitalCamera.h"
 
 #endif

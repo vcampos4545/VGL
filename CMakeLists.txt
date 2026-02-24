@@ -14,6 +14,7 @@ add_library(${PROJECT_NAME}
   src/Shader.cpp
   src/Mesh.cpp
   src/OBJMesh.cpp
+  src/OrbitalCamera.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
