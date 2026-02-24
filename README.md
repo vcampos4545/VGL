@@ -2,6 +2,8 @@
 
 A minimal OpenGL rendering layer for simulation and visualization tools.
 
+<img width="798" height="592" alt="Image" src="https://github.com/user-attachments/assets/7702ea99-ebd3-449a-a2e8-f514348da2b5" />
+
 ## Dependencies
 
 ```bash
