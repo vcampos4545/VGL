@@ -1,6 +1,6 @@
 # VGL
 
-Simple 2D/3D shape rendering library wrapping OpenGL.
+A minimal OpenGL rendering layer for simulation and visualization tools.
 
 ## Dependencies
 
@@ -21,7 +21,7 @@ include(FetchContent)
 
 FetchContent_Declare(
   vgl
-  GIT_REPOSITORY https://github.com/vgl/vgl.git
+  GIT_REPOSITORY https://github.com/vcampos4545/VGL.git
   GIT_TAG main
 )
 FetchContent_MakeAvailable(vgl)
@@ -32,7 +32,7 @@ target_link_libraries(your_app vgl)
 ### Git Submodule
 
 ```bash
-git submodule add https://github.com/vgl/vgl.git external/vgl
+git submodule add https://github.com/vcampos4545/VGL.git external/vgl
 ```
 
 ```cmake
