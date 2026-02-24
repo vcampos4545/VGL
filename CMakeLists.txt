@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(vaughngl VERSION 1.0.0)
+project(vgl VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -39,7 +39,7 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 # Install headers
-install(DIRECTORY include/vaughngl DESTINATION include)
+install(DIRECTORY include/vgl DESTINATION include)
 
 # Export targets for find_package
 install(EXPORT ${PROJECT_NAME}Targets
@@ -71,8 +71,8 @@ install(FILES
 
 # Only build example when this is the top-level project
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
-  option(VAUGHNGL_BUILD_EXAMPLE "Build example" ON)
-  if(VAUGHNGL_BUILD_EXAMPLE)
+  option(VGL_BUILD_EXAMPLE "Build example" ON)
+  if(VGL_BUILD_EXAMPLE)
     add_executable(example examples/example.cpp)
     target_link_libraries(example ${PROJECT_NAME})
 

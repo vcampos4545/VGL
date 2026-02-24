@@ -1,4 +1,4 @@
-#include <vaughngl/vaughngl.h>
+#include <vgl/vgl.h>
 #include <cmath>
 
 int main()
@@ -17,7 +17,8 @@ int main()
 
   // Load OBJ model
   OBJMesh pyramid;
-  if (!pyramid.load("models/pyramid.obj")) {
+  if (!pyramid.load("models/pyramid.obj"))
+  {
     return 1;
   }
 

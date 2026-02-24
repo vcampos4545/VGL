@@ -1,5 +1,5 @@
-#include <vaughngl/GUI.h>
-#include <vaughngl/EmbeddedShaders.h>
+#include <vgl/GUI.h>
+#include <vgl/EmbeddedShaders.h>
 #include <stdexcept>
 #include <cstdio>
 #include <cmath>

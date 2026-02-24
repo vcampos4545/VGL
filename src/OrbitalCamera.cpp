@@ -1,4 +1,4 @@
-#include <vaughngl/OrbitalCamera.h>
+#include <vgl/OrbitalCamera.h>
 #include <cmath>
 
 OrbitalCamera::OrbitalCamera(float dist, float y, float p, glm::vec3 tgt)
@@ -44,8 +44,8 @@ void OrbitalCamera::handleInput(GUI &gui, glm::vec2 mouseDelta, glm::vec2 scroll
   if (gui.isMouseButtonPressed(GLFW_MOUSE_BUTTON_RIGHT))
   {
     glm::vec3 forward = glm::normalize(target - gui.camera.position);
-    glm::vec3 right   = glm::normalize(glm::cross(forward, gui.camera.up));
-    target -= right         * mouseDelta.x * panSensitivity;
+    glm::vec3 right = glm::normalize(glm::cross(forward, gui.camera.up));
+    target -= right * mouseDelta.x * panSensitivity;
     target += gui.camera.up * mouseDelta.y * panSensitivity;
   }
 
@@ -56,7 +56,7 @@ void OrbitalCamera::handleInput(GUI &gui, glm::vec2 mouseDelta, glm::vec2 scroll
 
 void OrbitalCamera::applyToCamera(Camera &camera) const
 {
-  float yawRad   = glm::radians(yaw);
+  float yawRad = glm::radians(yaw);
   float pitchRad = glm::radians(pitch);
 
   camera.position = target + glm::vec3(

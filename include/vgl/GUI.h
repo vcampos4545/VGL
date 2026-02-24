@@ -1,10 +1,10 @@
 #ifndef GUI_H
 #define GUI_H
 
-#include <vaughngl/Shader.h>
-#include <vaughngl/Mesh.h>
-#include <vaughngl/Camera.h>
-#include <vaughngl/OBJMesh.h>
+#include <vgl/Shader.h>
+#include <vgl/Mesh.h>
+#include <vgl/Camera.h>
+#include <vgl/OBJMesh.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>

@@ -1,4 +1,4 @@
-# vaughngl
+# VGL
 
 Simple 2D/3D shape rendering library wrapping OpenGL.
 
@@ -20,30 +20,30 @@ sudo apt install libglfw3-dev libglew-dev libglm-dev
 include(FetchContent)
 
 FetchContent_Declare(
-  vaughngl
-  GIT_REPOSITORY https://github.com/vaughngl/vaughngl.git
+  vgl
+  GIT_REPOSITORY https://github.com/vgl/vgl.git
   GIT_TAG main
 )
-FetchContent_MakeAvailable(vaughngl)
+FetchContent_MakeAvailable(vgl)
 
-target_link_libraries(your_app vaughngl)
+target_link_libraries(your_app vgl)
 ```
 
 ### Git Submodule
 
 ```bash
-git submodule add https://github.com/vaughngl/vaughngl.git external/vaughngl
+git submodule add https://github.com/vgl/vgl.git external/vgl
 ```
 
 ```cmake
-add_subdirectory(external/vaughngl)
-target_link_libraries(your_app vaughngl)
+add_subdirectory(external/vgl)
+target_link_libraries(your_app vgl)
 ```
 
 ## Quick Start
 
 ```cpp
-#include <vaughngl/vaughngl.h>
+#include <vgl/vgl.h>
 
 int main() {
   GUI gui(800, 600, "My App");
