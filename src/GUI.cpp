@@ -98,6 +98,7 @@ void GUI::beginFrame()
   m_shader.setBool("useLighting", m_useLighting);
   m_shader.setVec3("lightDir", m_lightDir);
   m_shader.setVec3("viewPos", camera.position);
+  m_shader.setFloat("logDepthFarPlane", m_logDepthFarPlane);
 }
 
 void GUI::endFrame()

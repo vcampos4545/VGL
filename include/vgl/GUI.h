@@ -58,6 +58,10 @@ public:
   void setLighting(bool enabled) { m_useLighting = enabled; }
   void setLightDirection(glm::vec3 dir) { m_lightDir = glm::normalize(dir); }
 
+  // Logarithmic depth buffer — eliminates z-fighting over huge depth ranges.
+  // Pass farPlane (same value as camera.farPlane) to enable; 0 = disabled (default).
+  void setLogDepth(float farPlane) { m_logDepthFarPlane = farPlane; }
+
   // Keyboard input
   bool isKeyPressed(int key) const;
   bool isKeyJustPressed(int key) const;
@@ -113,6 +117,7 @@ private:
 
   bool m_useLighting = true;
   glm::vec3 m_lightDir{0.5f, 1.0f, 0.3f};
+  float m_logDepthFarPlane = 0.0f;
 
   // Input state
   std::unordered_set<int> m_keysPressed;

@@ -16,12 +16,14 @@ uniform mat4 projection;
 
 out vec3 FragPos;
 out vec3 Normal;
+out float v_fragW;
 
 void main() {
   vec4 worldPos = model * vec4(aPos, 1.0);
   FragPos = worldPos.xyz;
   Normal = mat3(transpose(inverse(model))) * aNormal;
   gl_Position = projection * view * worldPos;
+  v_fragW = gl_Position.w;
 }
 )";
 
@@ -30,15 +32,25 @@ inline const char* defaultFrag = R"(
 
 in vec3 FragPos;
 in vec3 Normal;
+in float v_fragW;
 
 uniform vec3 color;
 uniform vec3 lightDir;
 uniform vec3 viewPos;
 uniform bool useLighting;
+uniform float logDepthFarPlane;
 
 out vec4 FragColor;
 
 void main() {
+  // Logarithmic depth buffer — eliminates z-fighting across huge depth ranges.
+  // Set logDepthFarPlane > 0 to enable; 0 = standard hardware depth.
+  if (logDepthFarPlane > 0.0) {
+    gl_FragDepth = log2(max(1e-6, 1.0 + v_fragW)) / log2(1.0 + logDepthFarPlane);
+  } else {
+    gl_FragDepth = gl_FragCoord.z;
+  }
+
   if (!useLighting) {
     FragColor = vec4(color, 1.0);
     return;
