@@ -70,6 +70,9 @@ public:
   bool isMouseButtonJustReleased(int button) const;
   glm::vec2 getScrollDelta() const;
 
+  // Raycasting: unproject a mouse position into a world-space ray direction
+  glm::vec3 getMouseRay(glm::vec2 mousePos) const;
+
   Camera camera;
 
   int getWindowWidth() const { return m_windowWidth; }

@@ -517,3 +517,20 @@ glm::vec2 GUI::getScrollDelta() const
 {
   return m_scrollDelta;
 }
+
+glm::vec3 GUI::getMouseRay(glm::vec2 mousePos) const
+{
+  float x = (2.0f * mousePos.x) / m_windowWidth - 1.0f;
+  float y = 1.0f - (2.0f * mousePos.y) / m_windowHeight;
+
+  glm::mat4 projectionMatrix = camera.getProjectionMatrix((float)m_windowWidth / m_windowHeight);
+  glm::mat4 viewMatrix = camera.getViewMatrix();
+
+  glm::vec4 rayClip = glm::vec4(x, y, -1.0f, 1.0f);
+  glm::vec4 rayView = glm::inverse(projectionMatrix) * rayClip;
+
+  // Turn into direction
+  rayView = glm::vec4(rayView.x, rayView.y, -1.0f, 0.0f);
+  glm::vec3 rayWorld = glm::normalize(glm::vec3(glm::inverse(viewMatrix) * rayView));
+  return rayWorld;
+}
