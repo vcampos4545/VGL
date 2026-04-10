@@ -21,6 +21,7 @@ public:
   OrbitalCamera &setMinDistance(float d);
   OrbitalCamera &setZoomSensitivity(float s);
   OrbitalCamera &setPanSensitivity(float s);
+  OrbitalCamera &setTarget(glm::vec3 t);
 
   // Call once per frame before applyToCamera
   void handleInput(GUI &gui,

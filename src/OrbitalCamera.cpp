@@ -30,6 +30,12 @@ OrbitalCamera &OrbitalCamera::setPanSensitivity(float s)
   return *this;
 }
 
+OrbitalCamera &OrbitalCamera::setTarget(glm::vec3 t)
+{
+  target = t;
+  return *this;
+}
+
 void OrbitalCamera::handleInput(GUI &gui, glm::vec2 mouseDelta, glm::vec2 scrollDelta)
 {
   // Rotate with left mouse drag
