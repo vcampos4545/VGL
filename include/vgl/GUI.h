@@ -5,6 +5,7 @@
 #include <vgl/Mesh.h>
 #include <vgl/Camera.h>
 #include <vgl/OBJMesh.h>
+#include <vgl/Texture.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -42,6 +43,16 @@ public:
   void drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 color = {1, 1, 1});
   void drawCylinder(glm::vec3 pos, float radius, float length, glm::quat rotation, glm::vec3 color = {1, 1, 1});
   void drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 axis, glm::quat rotation, glm::vec3 color = {1, 1, 1});
+
+  // Textured sphere — lit version matches drawSphere lighting; pass a rotation
+  // quaternion to orient the texture (e.g. Earth rotation around Z axis).
+  void drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture);
+  void drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, const Texture& texture);
+
+  // Draw a texture-mapped sphere that fills the background (star field, sky).
+  // Translation is stripped from the view so the background stays fixed as the
+  // camera moves; depth writes are disabled so it never occludes scene objects.
+  void drawBackground(const Texture& texture);
 
   // OBJ mesh drawing (uses material colors from the mesh)
   void drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, float scale = 1.0f);

@@ -258,6 +258,60 @@ void GUI::drawSphere(glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 
   m_sphereMesh.draw();
 }
 
+void GUI::drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture)
+{
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
+  model = glm::scale(model, glm::vec3(radius * 2.0f));
+
+  m_shader.setBool("useTexture", true);
+  m_shader.setInt("uTexture", 0);
+  texture.bind(0);
+  setupDraw(model, {1.0f, 1.0f, 1.0f});
+  m_sphereMesh.draw();
+  m_shader.setBool("useTexture", false);
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void GUI::drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, const Texture& texture)
+{
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
+  model = model * glm::mat4_cast(rotation);
+  model = glm::scale(model, glm::vec3(radius * 2.0f));
+
+  m_shader.setBool("useTexture", true);
+  m_shader.setInt("uTexture", 0);
+  texture.bind(0);
+  setupDraw(model, {1.0f, 1.0f, 1.0f});
+  m_sphereMesh.draw();
+  m_shader.setBool("useTexture", false);
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void GUI::drawBackground(const Texture& texture)
+{
+  // Scale large enough that the sphere always contains the scene.
+  glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(100.0f));
+
+  // Strip translation so the background stays centered on the camera.
+  glm::mat4 viewRot = glm::mat4(glm::mat3(camera.getViewMatrix()));
+  m_shader.setMat4("view", viewRot);
+
+  glDepthMask(GL_FALSE);
+  m_shader.setBool("useTexture", true);
+  m_shader.setBool("useLighting", false);
+  m_shader.setInt("uTexture", 0);
+  texture.bind(0);
+  setupDraw(model, {1.0f, 1.0f, 1.0f});
+  m_sphereMesh.draw();
+  glDepthMask(GL_TRUE);
+
+  // Restore state for subsequent draw calls
+  m_shader.setBool("useTexture", false);
+  m_shader.setBool("useLighting", m_useLighting);
+  m_shader.setMat4("view", camera.getViewMatrix());
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void GUI::drawCube(glm::vec3 pos, float size, glm::vec3 color)
 {
   drawBox(pos, glm::vec3(size), color);

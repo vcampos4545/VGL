@@ -16,12 +16,14 @@ uniform mat4 projection;
 
 out vec3 FragPos;
 out vec3 Normal;
+out vec2 TexCoord;
 out float v_fragW;
 
 void main() {
   vec4 worldPos = model * vec4(aPos, 1.0);
-  FragPos = worldPos.xyz;
-  Normal = mat3(transpose(inverse(model))) * aNormal;
+  FragPos  = worldPos.xyz;
+  Normal   = mat3(transpose(inverse(model))) * aNormal;
+  TexCoord = aTexCoord;
   gl_Position = projection * view * worldPos;
   v_fragW = gl_Position.w;
 }
@@ -32,13 +34,16 @@ inline const char* defaultFrag = R"(
 
 in vec3 FragPos;
 in vec3 Normal;
+in vec2 TexCoord;
 in float v_fragW;
 
-uniform vec3 color;
-uniform vec3 lightDir;
-uniform vec3 viewPos;
-uniform bool useLighting;
-uniform float logDepthFarPlane;
+uniform vec3      color;
+uniform vec3      lightDir;
+uniform vec3      viewPos;
+uniform bool      useLighting;
+uniform bool      useTexture;
+uniform sampler2D uTexture;
+uniform float     logDepthFarPlane;
 
 out vec4 FragColor;
 
@@ -51,8 +56,10 @@ void main() {
     gl_FragDepth = gl_FragCoord.z;
   }
 
+  vec3 baseColor = useTexture ? texture(uTexture, TexCoord).rgb : color;
+
   if (!useLighting) {
-    FragColor = vec4(color, 1.0);
+    FragColor = vec4(baseColor, 1.0);
     return;
   }
 
@@ -66,7 +73,7 @@ void main() {
   vec3 halfDir = normalize(light + viewDir);
   float specular = pow(max(dot(norm, halfDir), 0.0), 32.0) * 0.3;
 
-  vec3 result = color * (ambient + diffuse) + vec3(specular);
+  vec3 result = baseColor * (ambient + diffuse) + vec3(specular);
   FragColor = vec4(result, 1.0);
 }
 )";

@@ -15,12 +15,15 @@ add_library(${PROJECT_NAME}
   src/Mesh.cpp
   src/OBJMesh.cpp
   src/OrbitalCamera.cpp
+  src/Texture.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
+  PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/external  # stb_image.h for Texture.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
