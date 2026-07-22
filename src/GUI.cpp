@@ -92,7 +92,9 @@ void GUI::beginFrame()
 
   m_shader.use();
 
-  float aspect = (float)m_framebufferWidth / m_framebufferHeight;
+  float aspect = (m_aspectOverride > 0.0f)
+      ? m_aspectOverride
+      : (float)m_framebufferWidth / m_framebufferHeight;
   m_shader.setMat4("view", camera.getViewMatrix());
   m_shader.setMat4("projection", camera.getProjectionMatrix(aspect));
   m_shader.setBool("useLighting", m_useLighting);

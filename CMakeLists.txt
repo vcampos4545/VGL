@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(vgl VERSION 1.0.0)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(OpenGL REQUIRED)
@@ -16,6 +16,12 @@ add_library(${PROJECT_NAME}
   src/OBJMesh.cpp
   src/OrbitalCamera.cpp
   src/Texture.cpp
+  src/Framebuffer.cpp
+  src/DataTexture.cpp
+  src/LineBatch2D.cpp
+  src/PointBatch2D.cpp
+  src/Triangulation.cpp
+  src/Renderer2D.cpp
 )
 
 target_include_directories(${PROJECT_NAME}
@@ -84,5 +90,8 @@ if(CMAKE_SOURCE_DIR STREQUAL CMAKE_CURRENT_SOURCE_DIR)
       COMMAND ${CMAKE_COMMAND} -E copy_directory
       ${CMAKE_CURRENT_SOURCE_DIR}/examples/models $<TARGET_FILE_DIR:example>/models
     )
+
+    add_executable(example2d examples/example2d.cpp)
+    target_link_libraries(example2d ${PROJECT_NAME})
   endif()
 endif()

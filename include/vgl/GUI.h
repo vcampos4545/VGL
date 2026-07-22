@@ -73,6 +73,12 @@ public:
   // Pass farPlane (same value as camera.farPlane) to enable; 0 = disabled (default).
   void setLogDepth(float farPlane) { m_logDepthFarPlane = farPlane; }
 
+  // Override the aspect ratio used to build the projection matrix.
+  // Use this when rendering into a sub-viewport (e.g. a split-screen panel).
+  // Pass 0 to restore automatic aspect from the framebuffer dimensions.
+  void setAspectOverride(float aspect) { m_aspectOverride = aspect; }
+  void clearAspectOverride()           { m_aspectOverride = 0.0f;   }
+
   // Keyboard input
   bool isKeyPressed(int key) const;
   bool isKeyJustPressed(int key) const;
@@ -129,6 +135,7 @@ private:
   bool m_useLighting = true;
   glm::vec3 m_lightDir{0.5f, 1.0f, 0.3f};
   float m_logDepthFarPlane = 0.0f;
+  float m_aspectOverride   = 0.0f;
 
   // Input state
   std::unordered_set<int> m_keysPressed;
