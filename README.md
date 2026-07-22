@@ -146,13 +146,80 @@ gui.setLighting(true);  // Enable/disable
 gui.setLightDirection({1, 1, 0.5f});
 ```
 
+## 2D Rendering Module
+
+`GUI` above is built around 3D scenes. For 2D/orthographic work (CFD
+visualization, editors, dashboards, HUDs) use `Renderer2D`, built on top
+of a `GUI`'s window/context/input:
+
+```cpp
+#include <vgl/vgl.h>
+
+GUI gui(900, 700, "2D App");
+Renderer2D renderer(gui);
+renderer.camera.setCenter({0, 0}).setViewHeight(4.0f);
+
+DataTexture field;
+field.uploadR32F(scalarData.data(), width, height); // re-upload any frame; reuses GPU storage
+
+while (!gui.shouldClose()) {
+  renderer.beginFrame({0.08f, 0.08f, 0.1f});
+
+  renderer.drawScalarField(field, {-2, -2}, {4, 4}, /*vmin*/ -1, /*vmax*/ 1, Colormap::Viridis);
+  renderer.drawGrid({-2, -2}, {4, 4}, 0.5f, {0.3f, 0.3f, 0.3f});
+  renderer.drawArrow({0, 0}, {1, 0.5f}, {1, 0.3f, 0.2f}, 2.0f);
+  renderer.drawFilledPolygon({{0,0}, {1,0}, {0.5f,1}}, {0.2f, 0.7f, 1.0f});
+  for (int i = 0; i < 500; ++i) renderer.addPoint(particlePos[i], 0.02f, {1, 0.8f, 0.2f});
+
+  renderer.endFrame();
+}
+```
+
+- **`Camera2D`** — orthographic, pan/zoom via `center`/`viewHeight`,
+  `screenToWorld`/`worldToScreen` for picking.
+- **`DataTexture`** — upload raw float arrays (`uploadR32F`/`uploadRG32F`)
+  every frame without reallocating; the vehicle for scalar/vector field
+  visualization.
+- **`drawScalarField`** — a world-space rect textured with a `DataTexture`
+  through a selectable `Colormap` (Viridis/Jet/CoolWarm/Grayscale/Fire),
+  with optional contour isolines and a second `DataTexture` composited as
+  a solid/obstacle mask.
+- **Batched primitives** — `drawLine`/`drawPolyline`/`drawArrow`/
+  `drawCircleOutline`/`drawRectOutline`/`drawGrid` all accumulate into one
+  `LineBatch2D` and draw in a single `GL_LINES` call per frame.
+  `drawFilledPolygon` triangulates (ear-clipping, `Triangulation.h`,
+  handles concave polygons) and draws immediately — fine for the
+  low-frequency case (object outlines), not meant for per-cell fills.
+- **`addPoint`** — instanced circle rendering (`PointBatch2D`) for
+  particle systems; thousands of points, one draw call.
+- **`Framebuffer`** — offscreen color+depth/stencil target for
+  render-to-texture panels or post-processing, independent of the 2D
+  module.
+
+If you're layering an immediate-mode UI (Dear ImGui, etc.) on top of a
+`Renderer2D` scene, don't call `endFrame()` directly — its buffer swap
+needs to happen *after* the UI's own render pass, or the UI will be
+drawn one frame behind the scene:
+
+```cpp
+renderer.beginFrame();
+// ... draw the 2D scene ...
+renderer.flush();          // draws the accumulated line/point batches, no swap
+// ... run the UI library's own render pass here ...
+renderer.present();        // swaps buffers, polls events
+```
+
+`endFrame()` is just `flush() + present()` and remains correct for a
+plain 2D scene with nothing composited on top.
+
 ## Run Example
 
 ```bash
 mkdir build && cd build
 cmake ..
 make
-./example
+./example      # 3D orbit-camera demo
+./example2d    # 2D module demo (scalar field, lines, filled polygon, particles)
 ```
 
 ### Example Controls
