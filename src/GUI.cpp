@@ -87,7 +87,7 @@ bool GUI::shouldClose() const
 
 void GUI::beginFrame()
 {
-  glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+  glClearColor(m_clearColor.r, m_clearColor.g, m_clearColor.b, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   m_shader.use();

@@ -69,6 +69,11 @@ public:
   void setLighting(bool enabled) { m_useLighting = enabled; }
   void setLightDirection(glm::vec3 dir) { m_lightDir = glm::normalize(dir); }
 
+  // Background (glClearColor) shown wherever nothing is drawn. Default is a
+  // neutral dark grey; scenes can set this per their setting (deep space,
+  // an overcast sky, etc).
+  void setClearColor(glm::vec3 color) { m_clearColor = color; }
+
   // Logarithmic depth buffer — eliminates z-fighting over huge depth ranges.
   // Pass farPlane (same value as camera.farPlane) to enable; 0 = disabled (default).
   void setLogDepth(float farPlane) { m_logDepthFarPlane = farPlane; }
@@ -134,6 +139,7 @@ private:
 
   bool m_useLighting = true;
   glm::vec3 m_lightDir{0.5f, 1.0f, 0.3f};
+  glm::vec3 m_clearColor{0.1f, 0.1f, 0.1f};
   float m_logDepthFarPlane = 0.0f;
   float m_aspectOverride   = 0.0f;
 
