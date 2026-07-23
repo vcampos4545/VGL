@@ -34,6 +34,7 @@ GUI::GUI(int width, int height, const char *title)
 
   setupCallbacks();
   m_shader.loadFromSource(EmbeddedShaders::defaultVert, EmbeddedShaders::defaultFrag);
+  m_groundPlaneShader.loadFromSource(EmbeddedShaders::groundPlaneVert, EmbeddedShaders::groundPlaneFrag);
   initMeshes();
 }
 
@@ -312,6 +313,40 @@ void GUI::drawBackground(const Texture& texture)
   m_shader.setBool("useLighting", m_useLighting);
   m_shader.setMat4("view", camera.getViewMatrix());
   glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void GUI::drawInfiniteGroundPlane(glm::vec3 groundColor, glm::vec3 fadeColor,
+                                  float planeZ, float maxDistance)
+{
+  float aspect = (m_aspectOverride > 0.0f)
+      ? m_aspectOverride
+      : (float)m_framebufferWidth / m_framebufferHeight;
+  glm::mat4 view = camera.getViewMatrix();
+  glm::mat4 proj = camera.getProjectionMatrix(aspect);
+  glm::mat4 viewProj = proj * view;
+
+  m_groundPlaneShader.use();
+  // Ray direction comes from the camera's own basis + FOV (well-conditioned
+  // regardless of far-plane distance) rather than an inverse view-projection
+  // matrix -- see the comment in EmbeddedShaders::groundPlaneFrag.
+  m_groundPlaneShader.setVec3("cameraPos", camera.position);
+  m_groundPlaneShader.setVec3("camForward", camera.getDirection());
+  m_groundPlaneShader.setVec3("camRight", camera.getRight());
+  m_groundPlaneShader.setVec3("camUp", camera.getUpVector());
+  m_groundPlaneShader.setFloat("tanHalfFovY", std::tan(glm::radians(camera.fov) * 0.5f));
+  m_groundPlaneShader.setFloat("aspect", aspect);
+
+  m_groundPlaneShader.setMat4("viewProj", viewProj);
+  m_groundPlaneShader.setVec3("groundColor", groundColor);
+  m_groundPlaneShader.setVec3("fadeColor", fadeColor);
+  m_groundPlaneShader.setFloat("planeZ", planeZ);
+  m_groundPlaneShader.setFloat("maxDistance", maxDistance);
+  m_groundPlaneShader.setFloat("logDepthFarPlane", m_logDepthFarPlane);
+
+  m_quadMesh.draw();
+
+  // Restore the default program -- every other draw call assumes it's bound.
+  m_shader.use();
 }
 
 void GUI::drawCube(glm::vec3 pos, float size, glm::vec3 color)

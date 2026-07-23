@@ -54,6 +54,15 @@ public:
   // camera moves; depth writes are disabled so it never occludes scene objects.
   void drawBackground(const Texture& texture);
 
+  // A true infinite ground plane (world-space plane z = planeZ), rendered
+  // by ray-casting per pixel in the fragment shader rather than as a mesh
+  // -- see EmbeddedShaders::groundPlaneFrag. Fades to fadeColor (typically
+  // your clear/sky color) at maxDistance. Unlike a giant flat box, this has
+  // no floating-point/depth precision breakdown far from the origin, since
+  // there are no vertices out there to lose precision on.
+  void drawInfiniteGroundPlane(glm::vec3 groundColor, glm::vec3 fadeColor,
+                               float planeZ = 0.0f, float maxDistance = 100000.0f);
+
   // OBJ mesh drawing (uses material colors from the mesh)
   void drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, float scale = 1.0f);
   void drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, float scale, glm::quat rotation);
@@ -130,6 +139,7 @@ private:
   int m_framebufferHeight;
 
   Shader m_shader;
+  Shader m_groundPlaneShader;
   Mesh m_circleMesh;
   Mesh m_quadMesh;
   Mesh m_cubeMesh;
