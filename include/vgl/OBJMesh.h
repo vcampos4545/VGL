@@ -39,6 +39,13 @@ public:
   const std::vector<SubMesh> &getSubMeshes() const { return m_subMeshes; }
   const std::string &getError() const { return m_error; }
 
+  // Axis-aligned bounding box of the raw OBJ vertex positions, in the
+  // model's own local space (before any draw-time scale/rotation/translate).
+  // Lets a caller fit a loaded model to a known real-world size without
+  // having to already know how the source file was authored/scaled.
+  glm::vec3 getBoundsMin() const { return m_boundsMin; }
+  glm::vec3 getBoundsMax() const { return m_boundsMax; }
+
 private:
   bool loadMTL(const std::string &path);
   void buildMeshes(
@@ -50,6 +57,8 @@ private:
   std::vector<SubMesh> m_subMeshes;
   std::unordered_map<std::string, Material> m_materials;
   std::string m_error;
+  glm::vec3 m_boundsMin{0.0f};
+  glm::vec3 m_boundsMax{0.0f};
 };
 
 #endif

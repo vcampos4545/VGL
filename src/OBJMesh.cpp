@@ -111,9 +111,23 @@ bool OBJMesh::load(const std::string &path)
 
     if (token == "mtllib")
     {
+      // The rest of the line, not just the next token -- OBJ filenames may
+      // contain spaces, which `iss >> mtlFile` would silently truncate at.
       std::string mtlFile;
-      iss >> mtlFile;
-      loadMTL(directory + mtlFile);
+      std::getline(iss, mtlFile);
+      size_t start = mtlFile.find_first_not_of(" \t");
+      mtlFile = (start == std::string::npos) ? "" : mtlFile.substr(start);
+
+      bool loaded = !mtlFile.empty() && loadMTL(directory + mtlFile);
+      if (!loaded)
+      {
+        // Some exporters write an mtllib name that doesn't match the .mtl
+        // file actually shipped alongside the .obj. Fall back to the
+        // conventional same-basename pairing (foo.obj -> foo.mtl).
+        size_t dot = path.find_last_of('.');
+        std::string base = (dot == std::string::npos) ? path : path.substr(0, dot);
+        loadMTL(base + ".mtl");
+      }
     }
     else if (token == "usemtl")
     {
@@ -199,6 +213,13 @@ bool OBJMesh::load(const std::string &path)
   {
     m_error = "No vertices found in file";
     return false;
+  }
+
+  m_boundsMin = m_boundsMax = positions[0];
+  for (const auto &p : positions)
+  {
+    m_boundsMin = glm::min(m_boundsMin, p);
+    m_boundsMax = glm::max(m_boundsMax, p);
   }
 
   buildMeshes(positions, normals, texCoords, materialFaces);
