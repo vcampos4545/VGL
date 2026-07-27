@@ -4,6 +4,7 @@
 #include <vgl/Shader.h>
 #include <vgl/Mesh.h>
 #include <vgl/Camera.h>
+#include <vgl/Material.h>
 #include <vgl/OBJMesh.h>
 #include <vgl/Texture.h>
 #include <GLFW/glfw3.h>
@@ -25,29 +26,33 @@ public:
   void beginFrame();
   void endFrame();
 
-  // 2D shapes (drawn in XY plane, can be positioned in 3D)
-  void drawCircle(glm::vec3 pos, float radius, glm::vec3 color = {1, 1, 1});
-  void drawCircle(glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 color = {1, 1, 1});
-  void drawRect(glm::vec3 pos, float width, float height, glm::vec3 color = {1, 1, 1});
-  void drawRect(glm::vec3 pos, float width, float height, glm::quat rotation, glm::vec3 color = {1, 1, 1});
+  // 2D shapes (drawn in XY plane, can be positioned in 3D). Unlit by default
+  // (matching prior behavior) since a flat facing-camera shape gains little
+  // from lighting, but pass a Material with lit = true to opt in.
+  void drawCircle(glm::vec3 pos, float radius, glm::vec3 color = {1, 1, 1}, Material material = Material::Unlit());
+  void drawCircle(glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 color = {1, 1, 1}, Material material = Material::Unlit());
+  void drawRect(glm::vec3 pos, float width, float height, glm::vec3 color = {1, 1, 1}, Material material = Material::Unlit());
+  void drawRect(glm::vec3 pos, float width, float height, glm::quat rotation, glm::vec3 color = {1, 1, 1}, Material material = Material::Unlit());
   void drawLine(glm::vec3 start, glm::vec3 end, glm::vec3 color = {1, 1, 1}, float width = 1.0f);
   void drawArrow(glm::vec3 start, glm::vec3 end, glm::vec3 color = {1, 1, 1}, float width = 1.0f);
 
-  // 3D shapes
-  void drawSphere(glm::vec3 pos, float radius, glm::vec3 color = {1, 1, 1});
-  void drawSphere(glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 color = {1, 1, 1});
-  void drawCube(glm::vec3 pos, float size, glm::vec3 color = {1, 1, 1});
-  void drawCube(glm::vec3 pos, float size, glm::quat rotation, glm::vec3 color = {1, 1, 1});
-  void drawBox(glm::vec3 pos, glm::vec3 size, glm::vec3 color = {1, 1, 1});
-  void drawBox(glm::vec3 pos, glm::vec3 size, glm::quat rotation, glm::vec3 color = {1, 1, 1});
-  void drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 color = {1, 1, 1});
-  void drawCylinder(glm::vec3 pos, float radius, float length, glm::quat rotation, glm::vec3 color = {1, 1, 1});
-  void drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 axis, glm::quat rotation, glm::vec3 color = {1, 1, 1});
+  // 3D shapes. Lit by default, using the current scene light + the given
+  // Material's reflectivity (default Material is a reasonable neutral
+  // surface); pass Material with lit = false for a flat unlit color.
+  void drawSphere(glm::vec3 pos, float radius, glm::vec3 color = {1, 1, 1}, Material material = {});
+  void drawSphere(glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 color = {1, 1, 1}, Material material = {});
+  void drawCube(glm::vec3 pos, float size, glm::vec3 color = {1, 1, 1}, Material material = {});
+  void drawCube(glm::vec3 pos, float size, glm::quat rotation, glm::vec3 color = {1, 1, 1}, Material material = {});
+  void drawBox(glm::vec3 pos, glm::vec3 size, glm::vec3 color = {1, 1, 1}, Material material = {});
+  void drawBox(glm::vec3 pos, glm::vec3 size, glm::quat rotation, glm::vec3 color = {1, 1, 1}, Material material = {});
+  void drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 color = {1, 1, 1}, Material material = {});
+  void drawCylinder(glm::vec3 pos, float radius, float length, glm::quat rotation, glm::vec3 color = {1, 1, 1}, Material material = {});
+  void drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 axis, glm::quat rotation, glm::vec3 color = {1, 1, 1}, Material material = {});
 
   // Textured sphere — lit version matches drawSphere lighting; pass a rotation
   // quaternion to orient the texture (e.g. Earth rotation around Z axis).
-  void drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture);
-  void drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, const Texture& texture);
+  void drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture, Material material = {});
+  void drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, const Texture& texture, Material material = {});
 
   // Draw a texture-mapped sphere that fills the background (star field, sky).
   // Translation is stripped from the view so the background stays fixed as the
@@ -68,15 +73,28 @@ public:
   void drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, float scale, glm::quat rotation);
   void drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, glm::vec3 scale);
   void drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, glm::vec3 scale, glm::quat rotation);
-  // OBJ mesh with color override (ignores material colors)
+  // OBJ mesh with color override (uses the given color instead of each
+  // submesh's diffuse color, but still applies its parsed ambient/specular/
+  // shininess/lit reflectivity properties)
   void drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, float scale, glm::vec3 color);
   void drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, float scale, glm::quat rotation, glm::vec3 color);
   void drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, glm::vec3 scale, glm::vec3 color);
   void drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, glm::vec3 scale, glm::quat rotation, glm::vec3 color);
 
   // Lighting control
+  // Master switch: false disables lighting scene-wide regardless of any
+  // per-object Material's lit flag (e.g. for a fully flat-shaded style).
   void setLighting(bool enabled) { m_useLighting = enabled; }
   void setLightDirection(glm::vec3 dir) { m_lightDir = glm::normalize(dir); }
+  void setLightColor(glm::vec3 color) { m_lightColor = color; }
+  void setLightIntensity(float intensity) { m_lightIntensity = intensity; }
+  // Hemisphere ambient fill: sky is blended in on up-facing surfaces, ground
+  // on down-facing ones, so faces angled away from the main light don't go
+  // flat dark. A per-object Material's ambient field multiplies this.
+  void setAmbientLight(glm::vec3 skyColor, glm::vec3 groundColor) {
+    m_ambientSky = skyColor;
+    m_ambientGround = groundColor;
+  }
 
   // Background (glClearColor) shown wherever nothing is drawn. Default is a
   // neutral dark grey; scenes can set this per their setting (deep space,
@@ -122,7 +140,7 @@ private:
   void initGL();
   void initMeshes();
   void setupCallbacks();
-  void setupDraw(const glm::mat4 &model, glm::vec3 color);
+  void setupDraw(const glm::mat4 &model, glm::vec3 color, const Material &material);
 
   // GLFW callbacks
   static void framebufferSizeCallback(GLFWwindow *window, int width, int height);
@@ -149,6 +167,10 @@ private:
 
   bool m_useLighting = true;
   glm::vec3 m_lightDir{0.5f, 1.0f, 0.3f};
+  glm::vec3 m_lightColor{1.0f, 1.0f, 1.0f};
+  float m_lightIntensity = 1.0f;
+  glm::vec3 m_ambientSky{0.30f, 0.32f, 0.38f};
+  glm::vec3 m_ambientGround{0.12f, 0.11f, 0.10f};
   glm::vec3 m_clearColor{0.1f, 0.1f, 0.1f};
   float m_logDepthFarPlane = 0.0f;
   float m_aspectOverride   = 0.0f;

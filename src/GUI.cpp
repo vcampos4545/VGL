@@ -98,8 +98,11 @@ void GUI::beginFrame()
       : (float)m_framebufferWidth / m_framebufferHeight;
   m_shader.setMat4("view", camera.getViewMatrix());
   m_shader.setMat4("projection", camera.getProjectionMatrix(aspect));
-  m_shader.setBool("useLighting", m_useLighting);
   m_shader.setVec3("lightDir", m_lightDir);
+  m_shader.setVec3("lightColor", m_lightColor);
+  m_shader.setFloat("lightIntensity", m_lightIntensity);
+  m_shader.setVec3("ambientSkyColor", m_ambientSky);
+  m_shader.setVec3("ambientGroundColor", m_ambientGround);
   m_shader.setVec3("viewPos", camera.position);
   m_shader.setFloat("logDepthFarPlane", m_logDepthFarPlane);
 }
@@ -118,60 +121,52 @@ void GUI::endFrame()
   glfwPollEvents();
 }
 
-void GUI::setupDraw(const glm::mat4 &model, glm::vec3 color)
+void GUI::setupDraw(const glm::mat4 &model, glm::vec3 color, const Material &material)
 {
   m_shader.setMat4("model", model);
   m_shader.setVec3("color", color);
+  m_shader.setBool("useLighting", m_useLighting && material.lit);
+  m_shader.setVec3("matAmbient", material.ambient);
+  m_shader.setVec3("matSpecular", material.specular);
+  m_shader.setFloat("matShininess", material.shininess);
 }
 
-void GUI::drawCircle(glm::vec3 pos, float radius, glm::vec3 color)
+void GUI::drawCircle(glm::vec3 pos, float radius, glm::vec3 color, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = glm::scale(model, glm::vec3(radius));
 
-  bool prevLighting = m_useLighting;
-  m_shader.setBool("useLighting", false);
-  setupDraw(model, color);
+  setupDraw(model, color, material);
   m_circleMesh.draw();
-  m_shader.setBool("useLighting", prevLighting);
 }
 
-void GUI::drawCircle(glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 color)
+void GUI::drawCircle(glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 color, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = model * glm::mat4_cast(rotation);
   model = glm::scale(model, glm::vec3(radius));
 
-  bool prevLighting = m_useLighting;
-  m_shader.setBool("useLighting", false);
-  setupDraw(model, color);
+  setupDraw(model, color, material);
   m_circleMesh.draw();
-  m_shader.setBool("useLighting", prevLighting);
 }
 
-void GUI::drawRect(glm::vec3 pos, float width, float height, glm::vec3 color)
+void GUI::drawRect(glm::vec3 pos, float width, float height, glm::vec3 color, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = glm::scale(model, glm::vec3(width, height, 1.0f));
 
-  bool prevLighting = m_useLighting;
-  m_shader.setBool("useLighting", false);
-  setupDraw(model, color);
+  setupDraw(model, color, material);
   m_quadMesh.draw();
-  m_shader.setBool("useLighting", prevLighting);
 }
 
-void GUI::drawRect(glm::vec3 pos, float width, float height, glm::quat rotation, glm::vec3 color)
+void GUI::drawRect(glm::vec3 pos, float width, float height, glm::quat rotation, glm::vec3 color, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = model * glm::mat4_cast(rotation);
   model = glm::scale(model, glm::vec3(width, height, 1.0f));
 
-  bool prevLighting = m_useLighting;
-  m_shader.setBool("useLighting", false);
-  setupDraw(model, color);
+  setupDraw(model, color, material);
   m_quadMesh.draw();
-  m_shader.setBool("useLighting", prevLighting);
 }
 
 void GUI::drawLine(glm::vec3 start, glm::vec3 end, glm::vec3 color, float width)
@@ -180,10 +175,8 @@ void GUI::drawLine(glm::vec3 start, glm::vec3 end, glm::vec3 color, float width)
   m_lineMesh.uploadLines(points);
 
   glLineWidth(width);
-  m_shader.setBool("useLighting", false);
-  setupDraw(glm::mat4(1.0f), color);
+  setupDraw(glm::mat4(1.0f), color, Material::Unlit());
   m_lineMesh.drawLines();
-  m_shader.setBool("useLighting", m_useLighting);
 }
 
 void GUI::drawArrow(glm::vec3 start, glm::vec3 end, glm::vec3 color, float width)
@@ -203,7 +196,7 @@ void GUI::drawArrow(glm::vec3 start, glm::vec3 end, glm::vec3 color, float width
 
   glm::vec3 shaftEnd = end - dirNorm * headLength;
 
-  // Draw shaft
+  // Draw shaft (drawLine handles the unlit setup)
   drawLine(start, shaftEnd, color, width);
 
   // Build orthonormal basis for cone
@@ -236,32 +229,30 @@ void GUI::drawArrow(glm::vec3 start, glm::vec3 end, glm::vec3 color, float width
 
   m_lineMesh.uploadLines(coneLines);
   glLineWidth(width);
-  m_shader.setBool("useLighting", false);
-  setupDraw(glm::mat4(1.0f), color);
+  setupDraw(glm::mat4(1.0f), color, Material::Unlit());
   m_lineMesh.drawLines();
-  m_shader.setBool("useLighting", m_useLighting);
 }
 
-void GUI::drawSphere(glm::vec3 pos, float radius, glm::vec3 color)
+void GUI::drawSphere(glm::vec3 pos, float radius, glm::vec3 color, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = glm::scale(model, glm::vec3(radius * 2.0f)); // mesh is unit diameter
 
-  setupDraw(model, color);
+  setupDraw(model, color, material);
   m_sphereMesh.draw();
 }
 
-void GUI::drawSphere(glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 color)
+void GUI::drawSphere(glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 color, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = model * glm::mat4_cast(rotation);
   model = glm::scale(model, glm::vec3(radius * 2.0f));
 
-  setupDraw(model, color);
+  setupDraw(model, color, material);
   m_sphereMesh.draw();
 }
 
-void GUI::drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture)
+void GUI::drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = glm::scale(model, glm::vec3(radius * 2.0f));
@@ -269,13 +260,13 @@ void GUI::drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture
   m_shader.setBool("useTexture", true);
   m_shader.setInt("uTexture", 0);
   texture.bind(0);
-  setupDraw(model, {1.0f, 1.0f, 1.0f});
+  setupDraw(model, {1.0f, 1.0f, 1.0f}, material);
   m_sphereMesh.draw();
   m_shader.setBool("useTexture", false);
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void GUI::drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, const Texture& texture)
+void GUI::drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, const Texture& texture, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = model * glm::mat4_cast(rotation);
@@ -284,7 +275,7 @@ void GUI::drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, co
   m_shader.setBool("useTexture", true);
   m_shader.setInt("uTexture", 0);
   texture.bind(0);
-  setupDraw(model, {1.0f, 1.0f, 1.0f});
+  setupDraw(model, {1.0f, 1.0f, 1.0f}, material);
   m_sphereMesh.draw();
   m_shader.setBool("useTexture", false);
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -301,16 +292,14 @@ void GUI::drawBackground(const Texture& texture)
 
   glDepthMask(GL_FALSE);
   m_shader.setBool("useTexture", true);
-  m_shader.setBool("useLighting", false);
   m_shader.setInt("uTexture", 0);
   texture.bind(0);
-  setupDraw(model, {1.0f, 1.0f, 1.0f});
+  setupDraw(model, {1.0f, 1.0f, 1.0f}, Material::Unlit());
   m_sphereMesh.draw();
   glDepthMask(GL_TRUE);
 
   // Restore state for subsequent draw calls
   m_shader.setBool("useTexture", false);
-  m_shader.setBool("useLighting", m_useLighting);
   m_shader.setMat4("view", camera.getViewMatrix());
   glBindTexture(GL_TEXTURE_2D, 0);
 }
@@ -349,55 +338,55 @@ void GUI::drawInfiniteGroundPlane(glm::vec3 groundColor, glm::vec3 fadeColor,
   m_shader.use();
 }
 
-void GUI::drawCube(glm::vec3 pos, float size, glm::vec3 color)
+void GUI::drawCube(glm::vec3 pos, float size, glm::vec3 color, Material material)
 {
-  drawBox(pos, glm::vec3(size), color);
+  drawBox(pos, glm::vec3(size), color, material);
 }
 
-void GUI::drawCube(glm::vec3 pos, float size, glm::quat rotation, glm::vec3 color)
+void GUI::drawCube(glm::vec3 pos, float size, glm::quat rotation, glm::vec3 color, Material material)
 {
-  drawBox(pos, glm::vec3(size), rotation, color);
+  drawBox(pos, glm::vec3(size), rotation, color, material);
 }
 
-void GUI::drawBox(glm::vec3 pos, glm::vec3 size, glm::vec3 color)
+void GUI::drawBox(glm::vec3 pos, glm::vec3 size, glm::vec3 color, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = glm::scale(model, size);
 
-  setupDraw(model, color);
+  setupDraw(model, color, material);
   m_cubeMesh.draw();
 }
 
-void GUI::drawBox(glm::vec3 pos, glm::vec3 size, glm::quat rotation, glm::vec3 color)
+void GUI::drawBox(glm::vec3 pos, glm::vec3 size, glm::quat rotation, glm::vec3 color, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = model * glm::mat4_cast(rotation);
   model = glm::scale(model, size);
 
-  setupDraw(model, color);
+  setupDraw(model, color, material);
   m_cubeMesh.draw();
 }
 
-void GUI::drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 color)
+void GUI::drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 color, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = glm::scale(model, glm::vec3(radius * 2.0f, length, radius * 2.0f));
 
-  setupDraw(model, color);
+  setupDraw(model, color, material);
   m_cylinderMesh.draw();
 }
 
-void GUI::drawCylinder(glm::vec3 pos, float radius, float length, glm::quat rotation, glm::vec3 color)
+void GUI::drawCylinder(glm::vec3 pos, float radius, float length, glm::quat rotation, glm::vec3 color, Material material)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = model * glm::mat4_cast(rotation);
   model = glm::scale(model, glm::vec3(radius * 2.0f, length, radius * 2.0f));
 
-  setupDraw(model, color);
+  setupDraw(model, color, material);
   m_cylinderMesh.draw();
 }
 
-void GUI::drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 axis, glm::quat rotation, glm::vec3 color)
+void GUI::drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 axis, glm::quat rotation, glm::vec3 color, Material material)
 {
   axis = glm::normalize(axis);
   glm::vec3 defaultAxis(0, 1, 0);
@@ -424,7 +413,7 @@ void GUI::drawCylinder(glm::vec3 pos, float radius, float length, glm::vec3 axis
   model = model * glm::mat4_cast(rotation * axisRot);
   model = glm::scale(model, glm::vec3(radius * 2.0f, length, radius * 2.0f));
 
-  setupDraw(model, color);
+  setupDraw(model, color, material);
   m_cylinderMesh.draw();
 }
 
@@ -456,7 +445,7 @@ void GUI::drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, glm::vec3 scale, glm::quat r
 
   for (const auto &subMesh : mesh.getSubMeshes())
   {
-    setupDraw(model, subMesh.material.diffuse);
+    setupDraw(model, subMesh.material.diffuse, subMesh.material);
     subMesh.mesh.draw();
   }
 }
@@ -487,7 +476,7 @@ void GUI::drawOBJMesh(OBJMesh &mesh, glm::vec3 pos, glm::vec3 scale, glm::quat r
 
   for (const auto &subMesh : mesh.getSubMeshes())
   {
-    setupDraw(model, color);
+    setupDraw(model, color, subMesh.material);
     subMesh.mesh.draw();
   }
 }

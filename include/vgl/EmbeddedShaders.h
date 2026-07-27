@@ -39,11 +39,25 @@ in float v_fragW;
 
 uniform vec3      color;
 uniform vec3      lightDir;
+uniform vec3      lightColor;
+uniform float     lightIntensity;
+// Hemisphere ambient: a sky and a ground color blended by how much a
+// surface faces up. Cheap stand-in for a second fill light -- without it,
+// any face angled away from the single directional light goes flat dark.
+uniform vec3      ambientSkyColor;
+uniform vec3      ambientGroundColor;
 uniform vec3      viewPos;
 uniform bool      useLighting;
 uniform bool      useTexture;
 uniform sampler2D uTexture;
 uniform float     logDepthFarPlane;
+
+// Per-object surface properties (see Material.h). ambient/specular are
+// multipliers on the scene's ambient/specular contribution (OBJ/MTL Ka/Ks
+// convention), not standalone colors; shininess controls highlight size.
+uniform vec3      matAmbient;
+uniform vec3      matSpecular;
+uniform float     matShininess;
 
 out vec4 FragColor;
 
@@ -66,14 +80,18 @@ void main() {
   vec3 norm = normalize(Normal);
   vec3 light = normalize(lightDir);
 
-  float ambient = 0.15;
-  float diffuse = max(dot(norm, light), 0.0);
+  float hemiMix = norm.y * 0.5 + 0.5;
+  vec3 ambient = mix(ambientGroundColor, ambientSkyColor, hemiMix) * matAmbient;
+
+  float diffuseTerm = max(dot(norm, light), 0.0);
+  vec3 diffuse = lightColor * lightIntensity * diffuseTerm;
 
   vec3 viewDir = normalize(viewPos - FragPos);
   vec3 halfDir = normalize(light + viewDir);
-  float specular = pow(max(dot(norm, halfDir), 0.0), 32.0) * 0.3;
+  float specTerm = pow(max(dot(norm, halfDir), 0.0), max(matShininess, 1.0));
+  vec3 specular = lightColor * lightIntensity * specTerm * matSpecular;
 
-  vec3 result = baseColor * (ambient + diffuse) + vec3(specular);
+  vec3 result = baseColor * (ambient + diffuse) + specular;
   FragColor = vec4(result, 1.0);
 }
 )";
