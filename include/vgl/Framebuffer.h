@@ -5,8 +5,8 @@
 
 // Offscreen render target with a single color attachment (plus depth/stencil
 // renderbuffer) and no MSAA. Intended for render-to-texture visualization
-// panels (e.g. rendering the simulation into a texture shown inside an
-// ImGui window) and simple post-processing.
+// panels (e.g. rendering the simulation into a texture shown inside some
+// other UI window) and simple post-processing.
 class Framebuffer {
 public:
   Framebuffer() = default;
