@@ -36,6 +36,7 @@ private:
   unsigned int m_indexCount = 0;
   unsigned int m_vertexCount = 0;
   bool m_isLineMode = false;
+  size_t m_lineCapacity = 0;
 };
 
 namespace MeshGen {

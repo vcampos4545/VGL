@@ -75,19 +75,37 @@ void Mesh::upload(const std::vector<Vertex> &vertices, const std::vector<unsigne
 
 void Mesh::uploadLines(const std::vector<glm::vec3> &points)
 {
-  cleanup();
+  // Reuses the VAO/VBO across calls (capacity grown with headroom, like the
+  // 2D batch renderers) instead of destroying and recreating GL objects on
+  // every call -- this is the hot path for GUI::drawLine/drawArrow, which
+  // upload here once per primitive, per frame.
+  if (!m_isLineMode)
+    cleanup();
   m_isLineMode = true;
   m_vertexCount = points.size();
 
-  glGenVertexArrays(1, &m_vao);
-  glGenBuffers(1, &m_vbo);
+  if (!m_vao)
+  {
+    glGenVertexArrays(1, &m_vao);
+    glGenBuffers(1, &m_vbo);
+    glBindVertexArray(m_vao);
+    glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void *)0);
+    glEnableVertexAttribArray(0);
+    glBindVertexArray(0);
+    m_lineCapacity = 0;
+  }
 
-  glBindVertexArray(m_vao);
   glBindBuffer(GL_ARRAY_BUFFER, m_vbo);
-  glBufferData(GL_ARRAY_BUFFER, points.size() * sizeof(glm::vec3), points.data(), GL_DYNAMIC_DRAW);
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void *)0);
-  glEnableVertexAttribArray(0);
-  glBindVertexArray(0);
+  if (m_vertexCount > m_lineCapacity)
+  {
+    m_lineCapacity = m_vertexCount + m_vertexCount / 2 + 64;
+    glBufferData(GL_ARRAY_BUFFER, m_lineCapacity * sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
+  }
+  if (m_vertexCount > 0)
+  {
+    glBufferSubData(GL_ARRAY_BUFFER, 0, m_vertexCount * sizeof(glm::vec3), points.data());
+  }
 }
 
 void Mesh::draw() const

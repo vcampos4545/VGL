@@ -43,6 +43,7 @@ void Shader::loadFromSource(const char *vertexSource, const char *fragmentSource
 {
   if (m_id)
     glDeleteProgram(m_id);
+  m_uniformCache.clear();
 
   GLuint vertex = glCreateShader(GL_VERTEX_SHADER);
   glShaderSource(vertex, 1, &vertexSource, NULL);
@@ -71,27 +72,37 @@ void Shader::use() const
 
 void Shader::setBool(const std::string &name, bool value) const
 {
-  glUniform1i(glGetUniformLocation(m_id, name.c_str()), (int)value);
+  glUniform1i(uniformLocation(name), (int)value);
 }
 
 void Shader::setInt(const std::string &name, int value) const
 {
-  glUniform1i(glGetUniformLocation(m_id, name.c_str()), value);
+  glUniform1i(uniformLocation(name), value);
 }
 
 void Shader::setFloat(const std::string &name, float value) const
 {
-  glUniform1f(glGetUniformLocation(m_id, name.c_str()), value);
+  glUniform1f(uniformLocation(name), value);
 }
 
 void Shader::setVec3(const std::string &name, const glm::vec3 &value) const
 {
-  glUniform3fv(glGetUniformLocation(m_id, name.c_str()), 1, glm::value_ptr(value));
+  glUniform3fv(uniformLocation(name), 1, glm::value_ptr(value));
 }
 
 void Shader::setMat4(const std::string &name, const glm::mat4 &mat) const
 {
-  glUniformMatrix4fv(glGetUniformLocation(m_id, name.c_str()), 1, GL_FALSE, glm::value_ptr(mat));
+  glUniformMatrix4fv(uniformLocation(name), 1, GL_FALSE, glm::value_ptr(mat));
+}
+
+GLint Shader::uniformLocation(const std::string &name) const
+{
+  auto it = m_uniformCache.find(name);
+  if (it != m_uniformCache.end())
+    return it->second;
+  GLint loc = glGetUniformLocation(m_id, name.c_str());
+  m_uniformCache.emplace(name, loc);
+  return loc;
 }
 
 std::string Shader::loadSource(const char *path)
