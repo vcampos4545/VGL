@@ -125,10 +125,35 @@ void GUI::setupDraw(const glm::mat4 &model, glm::vec3 color, const Material &mat
 {
   m_shader.setMat4("model", model);
   m_shader.setVec3("color", color);
-  m_shader.setBool("useLighting", m_useLighting && material.lit);
-  m_shader.setVec3("matAmbient", material.ambient);
-  m_shader.setVec3("matSpecular", material.specular);
-  m_shader.setFloat("matShininess", material.shininess);
+
+  bool lit = m_useLighting && material.lit;
+  if (!m_lastDrawStateValid || lit != m_lastLit)
+    m_shader.setBool("useLighting", lit);
+
+  // The shader's unlit branch returns before reading these, so skip them
+  // entirely for unlit draws (every 2D primitive, any Material::Unlit()).
+  if (lit)
+  {
+    bool forceSet = !m_lastDrawStateValid || !m_lastLit;
+    if (forceSet || material.ambient != m_lastMatAmbient)
+    {
+      m_shader.setVec3("matAmbient", material.ambient);
+      m_lastMatAmbient = material.ambient;
+    }
+    if (forceSet || material.specular != m_lastMatSpecular)
+    {
+      m_shader.setVec3("matSpecular", material.specular);
+      m_lastMatSpecular = material.specular;
+    }
+    if (forceSet || material.shininess != m_lastMatShininess)
+    {
+      m_shader.setFloat("matShininess", material.shininess);
+      m_lastMatShininess = material.shininess;
+    }
+  }
+
+  m_lastLit = lit;
+  m_lastDrawStateValid = true;
 }
 
 void GUI::drawCircle(glm::vec3 pos, float radius, glm::vec3 color, Material material)
