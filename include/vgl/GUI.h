@@ -55,6 +55,15 @@ public:
   void drawBackground(const Texture& texture);
   void drawBackground(const Texture& texture, glm::quat rotation);
 
+  // A flat, textured ring (annulus) -- e.g. planetary rings -- lying in the
+  // local XY plane before `rotation` is applied, matching drawTexturedSphere's
+  // convention. UVs run angularly and radially (see MeshGen::ring); a texture
+  // with per-pixel alpha (transparent hole/gaps) works as expected since
+  // blending is already enabled. The mesh regenerates only when
+  // innerRadius/outerRadius's ratio changes between calls.
+  void drawRing(glm::vec3 pos, float innerRadius, float outerRadius, glm::quat rotation,
+                const Texture& texture, glm::vec3 color = {1, 1, 1});
+
   // A true infinite ground plane (world-space plane z = planeZ), rendered
   // by ray-casting per pixel in the fragment shader rather than as a mesh
   // -- see EmbeddedShaders::groundPlaneFrag. Fades to fadeColor (typically
@@ -147,6 +156,8 @@ private:
   Mesh m_sphereMesh;
   Mesh m_cylinderMesh;
   Mesh m_lineMesh;
+  Mesh m_ringMesh;
+  float m_ringInnerRatio = -1.0f; // sentinel: forces first drawRing() to build the mesh
 
   bool m_useLighting = true;
   glm::vec3 m_lightDir{0.5f, 1.0f, 0.3f};

@@ -137,6 +137,40 @@ namespace MeshGen
     }
   }
 
+  void ring(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices, float innerRadiusRatio, int segments)
+  {
+    vertices.clear();
+    indices.clear();
+
+    for (int i = 0; i <= segments; ++i)
+    {
+      float angle = 2.0f * PI * i / segments;
+      float c = cos(angle);
+      float s = sin(angle);
+      float u = static_cast<float>(i) / segments;
+
+      // Inner edge (v=0) then outer edge (v=1) at this angle.
+      vertices.push_back({{c * innerRadiusRatio, s * innerRadiusRatio, 0}, {0, 0, 1}, {u, 0.0f}});
+      vertices.push_back({{c, s, 0}, {0, 0, 1}, {u, 1.0f}});
+    }
+
+    for (int i = 0; i < segments; ++i)
+    {
+      unsigned int innerCur = i * 2;
+      unsigned int outerCur = i * 2 + 1;
+      unsigned int innerNext = (i + 1) * 2;
+      unsigned int outerNext = (i + 1) * 2 + 1;
+
+      indices.push_back(innerCur);
+      indices.push_back(outerCur);
+      indices.push_back(innerNext);
+
+      indices.push_back(innerNext);
+      indices.push_back(outerCur);
+      indices.push_back(outerNext);
+    }
+  }
+
   void quad(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices)
   {
     vertices.clear();

@@ -322,6 +322,32 @@ void GUI::drawBackground(const Texture& texture, glm::quat rotation)
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void GUI::drawRing(glm::vec3 pos, float innerRadius, float outerRadius, glm::quat rotation,
+                   const Texture& texture, glm::vec3 color)
+{
+  const float ratio = (outerRadius > 0.0f) ? (innerRadius / outerRadius) : 0.0f;
+  if (!m_ringMesh.isUploaded() || ratio != m_ringInnerRatio)
+  {
+    std::vector<Vertex> vertices;
+    std::vector<unsigned int> indices;
+    MeshGen::ring(vertices, indices, ratio);
+    m_ringMesh.upload(vertices, indices);
+    m_ringInnerRatio = ratio;
+  }
+
+  glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
+  model = model * glm::mat4_cast(rotation);
+  model = glm::scale(model, glm::vec3(outerRadius));
+
+  m_shader.setBool("useTexture", true);
+  m_shader.setInt("uTexture", 0);
+  texture.bind(0);
+  setupDraw(model, color);
+  m_ringMesh.draw();
+  m_shader.setBool("useTexture", false);
+  glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void GUI::drawInfiniteGroundPlane(glm::vec3 groundColor, glm::vec3 fadeColor,
                                   float planeZ, float maxDistance)
 {

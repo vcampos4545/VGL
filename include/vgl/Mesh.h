@@ -44,6 +44,13 @@ namespace MeshGen {
   void cube(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices);
   void sphere(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, int rings = 16, int sectors = 32);
   void cylinder(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, int segments = 32);
+
+  // A flat annulus (ring) in the local XY plane, normal +Z, outer radius 1
+  // and inner radius innerRadiusRatio * 1 (0..1). UVs run angularly (u, 0..1
+  // around) and radially (v: 0 at the inner edge, 1 at the outer edge) --
+  // matching the common "radial strip" convention for planetary ring
+  // textures, so a simple 1D-ish gradient texture wraps correctly.
+  void ring(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, float innerRadiusRatio = 0.5f, int segments = 128);
 }
 
 #endif
