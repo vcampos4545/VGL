@@ -175,19 +175,6 @@ private:
   float m_logDepthFarPlane = 0.0f;
   float m_aspectOverride   = 0.0f;
 
-  // setupDraw() is called once per drawn object, every frame, in this
-  // unbatched immediate-mode API -- so it tracks the last lit/material
-  // state it actually issued to the shader and skips re-sending uniforms
-  // that would just repeat the same value (e.g. a scene drawing many
-  // objects that share one Material). Material uniforms are also skipped
-  // entirely for unlit draws, since the shader's unlit branch never reads
-  // them.
-  bool m_lastDrawStateValid = false;
-  bool m_lastLit = true;
-  glm::vec3 m_lastMatAmbient{1.0f};
-  glm::vec3 m_lastMatSpecular{1.0f};
-  float m_lastMatShininess = 0.0f;
-
   // Input state
   std::unordered_set<int> m_keysPressed;
   std::unordered_set<int> m_keysJustPressed;
