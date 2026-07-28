@@ -2,11 +2,19 @@
 #define OBJMESH_H
 
 #include <vgl/Mesh.h>
-#include <vgl/Material.h>
 #include <glm/glm.hpp>
 #include <string>
 #include <vector>
 #include <unordered_map>
+
+struct Material
+{
+  std::string name;
+  glm::vec3 diffuse{0.8f, 0.8f, 0.8f};
+  glm::vec3 ambient{0.2f, 0.2f, 0.2f};
+  glm::vec3 specular{1.0f, 1.0f, 1.0f};
+  float shininess = 32.0f;
+};
 
 struct SubMesh
 {
