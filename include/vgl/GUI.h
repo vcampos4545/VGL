@@ -53,6 +53,7 @@ public:
   // Translation is stripped from the view so the background stays fixed as the
   // camera moves; depth writes are disabled so it never occludes scene objects.
   void drawBackground(const Texture& texture);
+  void drawBackground(const Texture& texture, glm::quat rotation);
 
   // A true infinite ground plane (world-space plane z = planeZ), rendered
   // by ray-casting per pixel in the fragment shader rather than as a mesh

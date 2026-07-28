@@ -292,8 +292,15 @@ void GUI::drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, co
 
 void GUI::drawBackground(const Texture& texture)
 {
-  // Scale large enough that the sphere always contains the scene.
-  glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(100.0f));
+  drawBackground(texture, glm::quat(1.0f, 0.0f, 0.0f, 0.0f));
+}
+
+void GUI::drawBackground(const Texture& texture, glm::quat rotation)
+{
+  // Scale large enough that the sphere always contains the scene. Rotation
+  // lets callers correct for the sphere mesh's fixed UV orientation (its pole
+  // axis runs along local Y) or align the field to a reference frame.
+  glm::mat4 model = glm::scale(glm::mat4(1.0f), glm::vec3(100.0f)) * glm::mat4_cast(rotation);
 
   // Strip translation so the background stays centered on the camera.
   glm::mat4 viewRot = glm::mat4(glm::mat3(camera.getViewMatrix()));
