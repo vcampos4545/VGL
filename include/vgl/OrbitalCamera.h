@@ -7,7 +7,12 @@
 // Arcball-style orbital camera controller.
 // Left-drag  : rotate (yaw/pitch)
 // Right-drag : pan target point
-// Scroll     : zoom
+// Scroll     : zoom (exponential -- each scroll tick scales `distance` by
+//              a fixed *fraction* rather than subtracting a fixed amount,
+//              so zooming feels equally responsive whether `distance` is
+//              1 or 1e10; a fixed step is either imperceptible at large
+//              scale or too coarse at small scale, and there's no single
+//              constant that works at both)
 class OrbitalCamera
 {
 public:

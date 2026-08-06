@@ -55,8 +55,16 @@ void OrbitalCamera::handleInput(GUI &gui, glm::vec2 mouseDelta, glm::vec2 scroll
     target += gui.camera.up * mouseDelta.y * panSensitivity;
   }
 
-  // Zoom with scroll wheel
-  distance -= scrollDelta.y * zoomSensitivity;
+  // Zoom with scroll wheel -- exponential (multiplicative), not additive:
+  // distance *= 0.9^(scrollDelta.y * zoomSensitivity), so each tick moves
+  // distance by a percentage of its current value. A fixed additive step
+  // (the previous behavior) is imperceptible once distance is large (an
+  // orbital-scale scene, say) and too coarse once it's small (a close-up
+  // scene) -- there's no single constant step that works across scales
+  // that differ by many orders of magnitude. 0.9 is an arbitrary but
+  // reasonable per-tick zoom rate (~10% per tick at zoomSensitivity=1);
+  // still tunable via setZoomSensitivity, same as before.
+  distance *= std::pow(0.9f, scrollDelta.y * zoomSensitivity);
   distance = glm::clamp(distance, minDistance, maxDistance);
 }
 
