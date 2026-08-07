@@ -102,6 +102,7 @@ void GUI::beginFrame()
   m_shader.setVec3("lightDir", m_lightDir);
   m_shader.setVec3("viewPos", camera.position);
   m_shader.setFloat("logDepthFarPlane", m_logDepthFarPlane);
+  m_shader.setFloat("ambientLight", m_ambientLight);
 }
 
 void GUI::endFrame()
@@ -261,7 +262,7 @@ void GUI::drawSphere(glm::vec3 pos, float radius, glm::quat rotation, glm::vec3 
   m_sphereMesh.draw();
 }
 
-void GUI::drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture)
+void GUI::drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture, bool unlit)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = glm::scale(model, glm::vec3(radius * 2.0f));
@@ -269,13 +270,17 @@ void GUI::drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture
   m_shader.setBool("useTexture", true);
   m_shader.setInt("uTexture", 0);
   texture.bind(0);
+  if (unlit)
+    m_shader.setBool("useLighting", false);
   setupDraw(model, {1.0f, 1.0f, 1.0f});
   m_sphereMesh.draw();
+  if (unlit)
+    m_shader.setBool("useLighting", m_useLighting);
   m_shader.setBool("useTexture", false);
   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void GUI::drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, const Texture& texture)
+void GUI::drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, const Texture& texture, bool unlit)
 {
   glm::mat4 model = glm::translate(glm::mat4(1.0f), pos);
   model = model * glm::mat4_cast(rotation);
@@ -284,8 +289,12 @@ void GUI::drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, co
   m_shader.setBool("useTexture", true);
   m_shader.setInt("uTexture", 0);
   texture.bind(0);
+  if (unlit)
+    m_shader.setBool("useLighting", false);
   setupDraw(model, {1.0f, 1.0f, 1.0f});
   m_sphereMesh.draw();
+  if (unlit)
+    m_shader.setBool("useLighting", m_useLighting);
   m_shader.setBool("useTexture", false);
   glBindTexture(GL_TEXTURE_2D, 0);
 }

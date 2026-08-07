@@ -46,8 +46,12 @@ public:
 
   // Textured sphere — lit version matches drawSphere lighting; pass a rotation
   // quaternion to orient the texture (e.g. Earth rotation around Z axis).
-  void drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture);
-  void drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, const Texture& texture);
+  // Pass unlit=true for a self-illuminated object (e.g. a sun/star sphere)
+  // that should render at full texture brightness regardless of scene
+  // lighting/orientation, rather than being shaded/shadowed like an
+  // ordinary lit object.
+  void drawTexturedSphere(glm::vec3 pos, float radius, const Texture& texture, bool unlit = false);
+  void drawTexturedSphere(glm::vec3 pos, float radius, glm::quat rotation, const Texture& texture, bool unlit = false);
 
   // Draw a texture-mapped sphere that fills the background (star field, sky).
   // Translation is stripped from the view so the background stays fixed as the
@@ -87,6 +91,14 @@ public:
   // Lighting control
   void setLighting(bool enabled) { m_useLighting = enabled; }
   void setLightDirection(glm::vec3 dir) { m_lightDir = glm::normalize(dir); }
+
+  // Ambient term added to every lit surface regardless of light direction
+  // (0 = fully shadowed on the dark side, 1 = no shading at all) -- default
+  // 0.15 matches this renderer's original fixed value. Raise it for a
+  // scene where the unlit side of an object should still read as visible
+  // (e.g. Earth's night side lit only by this ambient floor, not true
+  // physical earthshine/city-light modeling).
+  void setAmbientLight(float ambient) { m_ambientLight = ambient; }
 
   // Background (glClearColor) shown wherever nothing is drawn. Default is a
   // neutral dark grey; scenes can set this per their setting (deep space,
@@ -161,6 +173,7 @@ private:
 
   bool m_useLighting = true;
   glm::vec3 m_lightDir{0.5f, 1.0f, 0.3f};
+  float m_ambientLight = 0.15f;
   glm::vec3 m_clearColor{0.1f, 0.1f, 0.1f};
   float m_logDepthFarPlane = 0.0f;
   float m_aspectOverride   = 0.0f;

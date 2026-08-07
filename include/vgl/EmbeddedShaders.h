@@ -44,6 +44,7 @@ uniform bool      useLighting;
 uniform bool      useTexture;
 uniform sampler2D uTexture;
 uniform float     logDepthFarPlane;
+uniform float     ambientLight;
 
 out vec4 FragColor;
 
@@ -66,14 +67,13 @@ void main() {
   vec3 norm = normalize(Normal);
   vec3 light = normalize(lightDir);
 
-  float ambient = 0.15;
   float diffuse = max(dot(norm, light), 0.0);
 
   vec3 viewDir = normalize(viewPos - FragPos);
   vec3 halfDir = normalize(light + viewDir);
   float specular = pow(max(dot(norm, halfDir), 0.0), 32.0) * 0.3;
 
-  vec3 result = baseColor * (ambient + diffuse) + vec3(specular);
+  vec3 result = baseColor * (ambientLight + diffuse) + vec3(specular);
   FragColor = vec4(result, 1.0);
 }
 )";
